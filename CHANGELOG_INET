@@ -1,0 +1,43 @@
+CHANGELOG
+
+* numbat-inet v0.1 (~ 15 Dec 2010)
+ -	BE Ctrl Connection are treated as high priority... not doing this makes the sim. to collapse due 
+	to lack of updates.
+ -	Handle Rx BWR is now a new separate function
+ - 	BS MAC parameters are now class members, to be able to be modified in run time for all functions
+ -	Proper handling for connection NACK on the SS side
+ -	Added service name (srvName) on FlowCreation, AddConnection and WMaxCon for presentation purposes.
+ - 	Logger Level added in WMaxCtrlBS statically (no parameter)
+ -	BUG fixed on CAC (UGS)
+ -	WiMax uses now its OWN ChannelControl module called "WiMaxCC" (default) so it does not
+ 	receive messages from other networks like WiFi (when they co-exist in the scenario)
+ -	CAC: BS will not accept connections (UGS, RTPS) that cannot serve
+ -	BS can now decline connections
+ -	Mac as module interface, so we can extend to DBA protocol support, or change the schedulers.
+ -	QForContainer from PON added in WMaxConn so we can have statistics per CID
+ -	Destructors added where needed - memory leaks fixed
+ -	On packet reception SS updates display string
+ -	SS Handover is based on the ChannelControl rather than the displayString for the distances
+ -	BS are registering on the ChannelControl Module in order to log their position
+ -	SS Mobility is now based on the INET mobility (old code left inside... TODO: Cleaning) 
+ -	UL MAP changed, bandwidth reported is now in SYMBOLS (uint16_t could not fit bit/frame)
+ -	Scheduling changed: 
+ 		+ UGS are served first
+ 		+ UGS min allocation of 25 symbols is always granted. This equals ~480Kbps and 
+ 			max Data-MTU size is 300 Bytes for 12 Bytes/symbol (120*12) 
+ 		+ BE are served fully or partially based on alloc=req*spare/total_req 
+ 		+ BE min. limit changed to 126symbols -> 2.4Mbps -> MTU of 1512Bytes (to fit ethernet)
+ 		+ rtPS added. MRR is always granted (on other case we have error of wrong config)
+ 		+ rtPS min. allocation is 120symbols -> ~2.3Mbps -> MTU of 1440Bytes
+ 		+ IF BE is fully served rtPS gets the rest till the MSR limit
+ -	A bug probably fixed in the UL-MAP for UGS service bandwidth allocation (shceduleUL()).
+ -	In order for the IP to route correctly we have register sub-interfaces of wimax interface.
+ 	(One for each CID we acquire)
+ -	Vlan to CID mapping and forwarding done.
+ -	Vlan traffic differentiation on Convergence Sublayer (Layer 2 ...).
+ -	Multiple CIDs may be requested based on the ServiceConfig Module (EPON Project).
+ -	Changed the BroadCast messages on the BS in order to send at LEAST 1 (independent of the frequency).
+ -	Register interface added: for INET protocol stack to work.
+ -	DHCP disabled.
+ -	IPv6 disabled.
+ -	INET/MANET compatibility - matching done: New models created..

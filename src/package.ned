@@ -1,0 +1,3 @@
+package numbat;
+
+@license(LGPL);
