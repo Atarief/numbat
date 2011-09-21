@@ -295,6 +295,9 @@ void WMaxMacBS::initialize()
     addRangingConn();
     initialBCSent = false;
     WMaxMac::initialize();
+
+    dlSymbolsPc = 0.5;
+    WATCH(dlSymbolsPc);
 }
 
 /**
@@ -466,19 +469,22 @@ double WMaxMacBS::dataRatePS2Symbols(int datarate){
  * Get the DSA_REQ message and decide if we can admit
  * this connection or we are out of symbols...
  *
- * Override to get different behaviour and CAC
+ * Override to get different behavior and CAC
  */
 bool WMaxMacBS::admitConnection(WMaxMsgDsaReq * dsareq){
 	string T = "admitConnection: ";
-	// Allow all BE
+	// Always Allow all BE
 	if (dsareq->getQos(0).connType == WMAX_CONN_TYPE_BE)
+		return true;
+	// Always Allow all BE
+	if (dsareq->getQos(0).connType == WMAX_CONN_TYPE_UGS)
 		return true;
 
 	// TODO: FIXME: FUCKME: recalc. the "free" symbols after serving all the connections
 
-	int dlSymbols = symbols*dlSymbolsPc;
+	int ulSymbols = symbols*(1-dlSymbolsPc_admit);
 	// Keep track of free symbols
-	int free_symbols = dlSymbols*subchannels;
+	int free_symbols = ulSymbols*subchannels;
 
 	for (list<WMaxConn>::iterator it=Conns.begin(); it!=Conns.end(); it++){
 		EV<<T<< "CID: "<< it->cid <<"("<<it->type<<")";
@@ -878,7 +884,7 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
     			if (  (symbols>=symbolLength) ) {
     				symbols -= symbolLength;
 
-    				Log(Debug) << ": Adding UGS grant: cid=" << ie.cid << ", bandwidth=" << ie.dataIE.duration << ", "
+    				Log(Debug) << ": Adding UGS grant: cid=" << it->cid << ", bandwidth=" << ie.dataIE.duration << ", "
     					   << symbolLength << " symbols, left=" << symbols << LogEnd;
 
     				ieCnt++;
@@ -891,6 +897,8 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
 					ulmap->setIE(ieCnt-1, ie);
 					break;
     			}else {
+
+
     				symbolLength=symbols;
     				symbols=0;
 
@@ -904,9 +912,7 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
     				EV<<"MISCONFIGURED MSR in UGS service... The Maximum you can have is:\nSumbols/frame: "<<
     						(this->symbols*subchannels)<<"\nTotal uplink is: "<<
     						((double)48*60*bytesPerPS*8*(double)(1.0/FrameLength)/2)<<endl;
-    				cout<<"MISCONFIGURED MSR in UGS service... The Maximum you can have is:\nSumbols/frame: "<<
-							(this->symbols*subchannels)<<"\nTotal uplink is: "<<
-							((double)48*60*bytesPerPS*8*(double)(1.0/FrameLength)/2)<<endl;
+
     			}
 
 
@@ -1079,6 +1085,9 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
 				Log(Crit) << "Failed to add RTPS grant: cid=" << it->cid << ", bandwidth=" << it->bandwidth << ", "
 								   << symbolLength << " symbols out of: "<< symbols << ", MSR="<<
 								   it->qos.rtps.msr << ", MRR="<< it->qos.rtps.mrr << LogEnd;
+				cout << "Failed to add RTPS grant: cid=" << it->cid << ", bandwidth=" << it->bandwidth << ", "
+												   << symbolLength << " symbols out of: "<< symbols << ", MSR="<<
+												   it->qos.rtps.msr << ", MRR="<< it->qos.rtps.mrr << endl;
 				// MisConfigured Granted service...
 				//opp_error("MISCONFIGURED MSR in RTPS service... \nsymbols=%d \nsymbolLength=%d",symbols,symbolLength);
 
@@ -1138,9 +1147,18 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
     advance(itbe,BEpoint);
     Log(Crit)<<"Starting BE at CID="<<itbe->cid<<endl;
 
-    bool moreBE = false;
+
     for (int i=0; i<(int)Conns.size(); i++){
-    	Log(Debug)<<"i="<<i<<" Total="<<Conns.size()<<endl;
+    	// Fix iterator overflow
+    	if (itbe == Conns.end()) itbe = Conns.begin();
+    	Log(Debug)<<"i="<<i<<" cid="<<itbe->cid<<" Total="<<Conns.size()<<endl;
+
+    	// Break if no symbols left
+    	if (!symbols>0){
+    		Log(Crit)<<"STOPING RR NO SYMBOLS LEFT"<<endl;
+    		break;
+    	}
+
     	switch (itbe->type) {
 		case WMAX_CONN_TYPE_BE:
 		{
@@ -1160,6 +1178,7 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
 			// Handle Control Connections HERE
 			if (itbe->controlConn) {
 				itbe++;
+				Log(Debug)<<" Skipping Control"<<endl;
 				continue;
 			}
 
@@ -1182,22 +1201,20 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
 					if (WMAX_SCHED_MIN_BE_SYMBOLS <= symbols) {
 						// assign min.
 						tmp_bw_anal = WMAX_SCHED_MIN_BE_SYMBOLS*bytesPerPS*8;
-						BEpoint = (i+1)%Conns.size();
+						BEpoint = (BEpoint+i+1)%Conns.size();
 					}
 					// There is no min. to assign... assign what we have
 					// DO not advance iterator
 					else{
 						tmp_bw_anal = symbols*bytesPerPS*8;
-						BEpoint = i;
+						//BEpoint = i;
 					}
-					moreBE = false;
 				}else{
 					// Do not allocate at all here...
 					//itbe->bandwidth+=reqbw;
 					totbereq -= itbe->qos.be.reqbw;//itbe->bandwidth;
 					itbe->bandwidth=0;
 
-					moreBE = true;
 
 					Log(Debug) << ": Skipping BE under congestion: cid=" << itbe->cid << ", bandwith=" << tmp_bw << ", Final_bw: "<<tmp_bw_anal
 							<< ", reqbw="<< reqbw  << ", "<< symbolLength << " symbols, left=" << symbols << LogEnd;
@@ -1259,8 +1276,6 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
 
     } // End Of BE loop
 
-    //if (!moreBE)
-    //	BEpoint= 0;
 
 
 
@@ -1301,7 +1316,7 @@ void WMaxMac::initialize(){
 	// Initialize MAC parameters statically currently
 	symbols = 48;
 	/// the % of symbols to be used for upload
-	dlSymbolsPc = 0.5;
+	dlSymbolsPc_admit = dlSymbolsPc = 0.5;
 	subchannels = 60;
 
 }

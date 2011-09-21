@@ -1,6 +1,17 @@
 CHANGELOG
+* numbat-inet v0.2 (~ 30 Jun 2011 - 21 Sep 2011)
+ -	RSA NACKs are now logged as scalar
+ -	Some documentation added
+ -	Retry Connection on Scan Response for any NACKed flow
+ -	Fairness fixxed in the scheduler
+ -	Scheduler now just WARNS for misconfiguration (out of symbols), instead of opp_error
+ -	ulSymbolsPc now indicates the % of symbols used for Uplink (TODO: add as parameter) 
+ -	ulSymbolsPc_admit can be used to indicate how many symbols should be used for admission 
+ 	control, independantly from the number used for scheduling
+
 
 * numbat-inet v0.1 (~ 15 Dec 2010)
+ -	BE Under Congestion: Fairness fixed
  -	BE Ctrl Connection are treated as high priority... not doing this makes the sim. to collapse due 
 	to lack of updates.
  -	Handle Rx BWR is now a new separate function

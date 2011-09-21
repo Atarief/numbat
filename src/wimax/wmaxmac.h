@@ -33,12 +33,11 @@ using namespace std;
 /**
  * Urb@n
  *
- * Minimal UGS grant, which can be assigned (leads to 2.4Mbps for 5ms frame)
  * Voip Packets have 20-150B payload + headers(RTP/UDP/IP) =~ 200.
- * Now 4 symbols is the absolute minimum, which gives us 25*8 = 300 B
- * The above results to 384*8/frameSize bps (for 5ms == 480Kbps)
+ * Now 25 symbols is the absolute minimum, which gives us 25*8 = 300 B
+ * The above results to 300*8/frameSize bps (for 5ms == 480Kbps)
  */
-#define WMAX_SCHED_MIN_UGS_SYMBOLS 25
+#define WMAX_SCHED_MIN_UGS_SYMBOLS 26
 
 /**
  *  Urban - TODO:Find the documents
@@ -243,8 +242,10 @@ class WMaxMac : public cSimpleModule
 
     // --- These _should_ be par. but not currently
     int symbols;
-    /// the % of symbols to be used for upload
+    /// the % of symbols to be used for upload scheduling
     double dlSymbolsPc;
+    /// the % of symbols to be used for CAC
+    double dlSymbolsPc_admit;
     /// Subchannels
     int subchannels;
 
@@ -280,13 +281,13 @@ class WMaxMacBS: public WMaxMac
 
     void handleRxMessage(cMessage* msg);
 
-    bool admitConnection(WMaxMsgDsaReq * dsareq);
-    double dataRatePS2Symbols(int datarate);
+    virtual bool admitConnection(WMaxMsgDsaReq * dsareq);
+    virtual double dataRatePS2Symbols(int datarate);
 
-    void schedule();
-    void scheduleBcastMessages(); // prepare broadcast messages sent periodically (DCD, UCD, Neighbor-Advertisements)
-    WMaxMsgDlMap * scheduleDL(int symbols);
-    WMaxMsgUlMap * scheduleUL(int symbols);
+    virtual void schedule();
+    virtual void scheduleBcastMessages(); // prepare broadcast messages sent periodically (DCD, UCD, Neighbor-Advertisements)
+    virtual WMaxMsgDlMap * scheduleDL(int symbols);
+    virtual WMaxMsgUlMap * scheduleUL(int symbols);
     /// Send at least the first BC (BroadCast) Messages, else SS do not register...
     bool initialBCSent;
 

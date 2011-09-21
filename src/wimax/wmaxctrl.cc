@@ -43,7 +43,7 @@ ostream & operator <<(ostream & s, Transaction &trans)
 ostream & operator <<(ostream & s, WMaxFlowSS &f) 
 {
   s << "state=" << f.CurrentStateGet()->getFullName()
-    << ", transID=" << f.transactionID << " cid=" << f.cid << "vlanid=" << f.vlanid
+    << ", transID=" << f.transactionID << " cid=" << f.cid << ", vlanid=" << f.vlanid
     << " qos=[connType=" << f.qos.connType << ", msr=" << f.qos.msr << "]";
   return s;
 }
@@ -658,7 +658,6 @@ FsmStateType WMaxCtrlSS::onEnterState_SvcFlowCreation(Fsm * fsm) {
 			if (i==min_idx)
 				flow->handleMessage( ss->createNewFlowEvent(WMAX_CONN_TYPE_BE,0,100000,serviceList[i].name) );
 			else if (serviceList[i].name == "Video" || serviceList[i].name == "VIDEO")
-				// ToDo Read from service list
 				flow->handleMessage( ss->createNewFlowEvent(WMAX_CONN_TYPE_RTPS, tmp_msr, tmp_mrr,serviceList[i].name) );
 			else
 				flow->handleMessage( ss->createNewFlowEvent(WMAX_CONN_TYPE_UGS,tmp_msr, 0, serviceList[i].name) );
@@ -836,6 +835,29 @@ FsmStateType WMaxCtrlSS::onEventState_WaitForMobScnRsp(Fsm * fsm, FsmEventType e
         SLog(fsm, Notice) << "Currently associated with BS: " << actBS << ", the nearest BS :" << nearestBS << LogEnd;
 
         if(nearestBS == actBS) {
+        	// Urb@n try to re-request QoS for disabled flows
+        	list<WMaxFlowSS*>::iterator it = ssctl->serviceFlows.end();
+        	while (it!=ssctl->serviceFlows.begin()){
+        		--it;
+        		SLog(fsm, Debug)<<"Requesting AGAIN for cid="<<(*it)->cid<<endl;
+        		if ((*it)->CurrentStateGet()->type == WMaxFlowSS::STATE_DISABLED){
+        			// get type
+        			cModuleType *mtype = cModuleType::get("numbat.wimax.WMaxFlowSS");
+        			// Make module
+        			WMaxFlowSS *flow = dynamic_cast<WMaxFlowSS*>(mtype->create("WMaxFlowSS", fsm));
+        			flow->setParentFsm(fsm);
+					flow->finalizeParameters();
+					flow->buildInside();
+					flow->vlanid = (*it)->vlanid;
+        			flow->handleMessage(ssctl->createNewFlowEvent((*it)->qos.connType, (*it)->qos.msr, (*it)->qos.mrr, (*it)->srvName) );
+
+
+        			ssctl->serviceFlows.remove((*it));
+        			delete (*it);
+        			ssctl->serviceFlows.push_back(flow);
+        		}
+
+			}
             return STATE_OPERATIONAL;
         } else {
         	ssctl->hoInfo->wmax.nextBS = nearestBS;
@@ -1596,6 +1618,7 @@ void WMaxFlowSS::setParentFsm(Fsm *parent){
 
 void WMaxFlowSS::fsmInit() {
     setName("WMaxFlowSS");
+    rsaNACKs = 0;
     statesEventsInit(WMaxFlowSS::STATE_NUM, WMaxFlowSS::EVENT_NUM, STATE_START);
 
     stateInit(STATE_START, "Start", onEventState_Start);
@@ -1725,6 +1748,12 @@ FsmStateType WMaxFlowSS::onEventState_WaitingDsxRvd(Fsm * fsm, FsmEventType e, c
  *  - In sim. it cannot be easily done, cause after the "term. all"
  *  we receive an addConnection... which messes things up. So currently
  *  work with the rest of the connections. (TODO)
+ *
+ *  RECONNECTION:
+ *   Re-connection is done on scan response... So scan interval
+ *   indicates the "connect retry" interval also...
+ *
+ *   @see  onEventState_WaitForMobScnRsp
  */
 FsmStateType WMaxFlowSS::onEventState_WaitingDsaRsp(Fsm * fsm, FsmEventType e, cMessage * msg) {
     WMaxMsgDsaRsp *dsarsp = dynamic_cast<WMaxMsgDsaRsp*>(msg);
@@ -1745,6 +1774,7 @@ FsmStateType WMaxFlowSS::onEventState_WaitingDsaRsp(Fsm * fsm, FsmEventType e, c
     		SLog(fsm, Notice) <<  "Terminating current connection... DSA-RSP NEGATIVE" << LogEnd;
     		// Urb@n: Flow remains on disabled state and CS and MAC never see it...
     	    ctrlSS->onEvent(WMaxCtrlSS::EVENT_SERVICE_FLOW_COMPLETE, 0);
+    	    flow->rsaNACKs++;
 
     		return STATE_DISABLED;
     	}
@@ -1811,12 +1841,16 @@ FsmStateType WMaxFlowSS::onEventState_Disabled(Fsm * fsm, FsmEventType e, cMessa
     }
 }
 
-
+void WMaxFlowSS::finish(){
+	std::stringstream ss;
+	ss<<srvName<<" CID: "<<cid<<" rsaNACKs";
+	recordScalar(ss.str().c_str(), rsaNACKs);
+}
 /** 
  * this method throws new WMaxEvent_FlowCreationStart event, which is used
  * during service flow creation
  * 
- * @return 
+ * @return WMaxEvent_FlowCreationStart
  */
 WMaxEvent_FlowCreationStart * WMaxCtrlSS::createNewFlowEvent(WMaxConnType type, uint32_t msr, uint32_t mrr, std::string srvName)
 {
@@ -1865,3 +1899,5 @@ WMaxEvent_FlowCreationStart * WMaxCtrlSS::createNewFlowEvent(WMaxConnType type, 
 
     return msg;
 }
+
+

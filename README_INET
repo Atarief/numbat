@@ -1,4 +1,9 @@
-This version depends on 802.1Q VLANs for the CS sub-layer that can be found at:
+This version depends on 
+
+- 802.1Q VLANs for the CS sub-layer 
+- PON for CopyableQueues, per flow statistics
+
+Both can be found at:
 
 http://sourceforge.net/projects/omneteponmodule/
 
@@ -6,6 +11,10 @@ Installation:
 - Download
 - Extract the archive 
 - Import the Vlans project into your workspace
+- Import the PON project into your workspace
 - Clean it and re-compile it
 
 ... it should work. Separate link will be provided in the future (only for the VLANs)
+
+
+Andreas

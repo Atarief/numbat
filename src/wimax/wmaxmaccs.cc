@@ -128,8 +128,23 @@ void WMaxMacCS::handleMessage(cMessage *msg) {
 void WMaxMacCS::handleUlMessage(cMessage *msg) {
 
 	// Check if this is an EtherFrame...
-	if (dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo())){
+	// These messages are ONLY generated from the
+	// BS it self! Urb@n
+	Ieee802Ctrl * ethctl = dynamic_cast<Ieee802Ctrl *>(msg->getControlInfo());
+
+
+	if (ethctl){
 		send(msg, "ipOut", 0);
+		// Add a dummy CID to forward from the BS
+		if (getMACForCID(0)==""){
+			WMaxMacCSRule rule = {0};
+			rule.cid     = 0;
+			rule.dstAddr = IPv6Addr();
+			rule.macAddr = NULL;
+			rule.vlanid  = 0;
+			csTable.push_back(rule);
+			updateLog();
+		}
 		return;
 	}
 

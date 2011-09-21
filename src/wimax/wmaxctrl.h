@@ -241,6 +241,8 @@ protected:
     TIMER_DEF(NetworkEntry);
     TIMER_DEF(Reentry);
 
+
+
 private:
     int sfCnt; // number of service flows
     void mihNotify(MihInfo_t notifyType, int data = 0);
@@ -310,11 +312,8 @@ public:
     Fsm *parentFsm;
     std::string srvName;
 
-    ~WMaxFlowSS();
-protected:
-    TransVlanId trvlan_map;
-
-    void fsmInit();
+    // Urb@n
+    int rsaNACKs;
 
     typedef enum {
         STATE_START,
@@ -327,6 +326,17 @@ protected:
         STATE_NUM
     } State;
 
+    ~WMaxFlowSS();
+
+    /** @Override */
+    virtual void finish();
+protected:
+    TransVlanId trvlan_map;
+
+    void fsmInit();
+
+
+
     static FsmStateType onEventState_Start(Fsm * fsm, FsmEventType e, cMessage * msg);
     static FsmStateType onEnterState_SendDsaReq(Fsm * fsm);
     static FsmStateType onEventState_WaitingDsxRvd(Fsm * fsm, FsmEventType e, cMessage * msg);
@@ -334,6 +344,7 @@ protected:
     static FsmStateType onEnterState_SendDsaAck(Fsm * fsm);
     static FsmStateType onEventState_Operational(Fsm * fsm, FsmEventType e, cMessage * msg);
     static FsmStateType onEventState_Disabled(Fsm * fsm, FsmEventType e, cMessage *msg);
+
 
     typedef enum {
         EVENT_START,
