@@ -158,6 +158,7 @@ void WMaxCtrlSS::initialize() {
     hoInfo = &tmp2->hoInfo;
 
     int initialBS = SSif->par("initialBS");
+    tmp2->initialBS=initialBS;
 
     Log(Notice) << "Attaching to initial BS: " << initialBS << LogEnd;
     connectBS(initialBS);
@@ -287,6 +288,8 @@ void WMaxCtrlSS::handleMessage(cMessage *msg)
     }
 
     if (dynamic_cast<WMaxMsgBSHORSP*>(msg)) {
+    	// Urban: This message causes disconnection from the BS
+    	// And deletition of the SS from its list
 	onEvent(EVENT_BSHO_RSP_RECEIVED, msg);
 	delete msg;
 	return;
@@ -836,11 +839,16 @@ FsmStateType WMaxCtrlSS::onEventState_WaitForMobScnRsp(Fsm * fsm, FsmEventType e
 
         if(nearestBS == actBS) {
         	// Urb@n try to re-request QoS for disabled flows
-        	list<WMaxFlowSS*>::iterator it = ssctl->serviceFlows.end();
-        	while (it!=ssctl->serviceFlows.begin()){
-        		--it;
-        		SLog(fsm, Debug)<<"Requesting AGAIN for cid="<<(*it)->cid<<endl;
+        	int i=ssctl->serviceFlows.size();
+
+        	while (i>0) {
+        		--i;
+        		std::list<WMaxFlowSS *>::iterator it = ssctl->serviceFlows.begin();
+        		std::advance(it, i);
+        		SLog(fsm, Debug)<<"Requesting AGAIN for cid="<<(*it)->cid<<" for vlan="<<(*it)->vlanid<<endl;
+
         		if ((*it)->CurrentStateGet()->type == WMaxFlowSS::STATE_DISABLED){
+
         			// get type
         			cModuleType *mtype = cModuleType::get("numbat.wimax.WMaxFlowSS");
         			// Make module
@@ -851,12 +859,12 @@ FsmStateType WMaxCtrlSS::onEventState_WaitForMobScnRsp(Fsm * fsm, FsmEventType e
 					flow->vlanid = (*it)->vlanid;
         			flow->handleMessage(ssctl->createNewFlowEvent((*it)->qos.connType, (*it)->qos.msr, (*it)->qos.mrr, (*it)->srvName) );
 
-
-        			ssctl->serviceFlows.remove((*it));
+        			// Call finish to log!
+        			(*it)->finish();
         			delete (*it);
+        			ssctl->serviceFlows.remove((*it));
         			ssctl->serviceFlows.push_back(flow);
         		}
-
 			}
             return STATE_OPERATIONAL;
         } else {
@@ -1002,6 +1010,12 @@ FsmStateType WMaxCtrlSS::onEnterState_SendHoInd(Fsm *fsm)
     } else {
 	// delete flow objects
 	for (list<WMaxFlowSS*>::iterator it=ss->serviceFlows.begin(); it!=ss->serviceFlows.end(); ++it) {
+		/*
+		 *  Urb@n: the above handleMessage is NOT responsible for logging rsaNACKs...
+		 *  since tha flow may be dissabled but not deleted! Whenever you delete a flow,
+		 *  call finish to log!
+		 */
+		(*it)->finish();
 	    delete *it;
 	} 
 	// remove pointers to those objects
@@ -1129,7 +1143,7 @@ void WMaxCtrlSS::connectBS(int x) {
 
 }
 
-void WMaxCtrlSS::disconnect() {
+void WMaxCtrlSS::disconnect(bool fromDestructor) {
 
 //     cModule *SS = getParentModule();
     if (!SSif->gate("out")->getNextGate()->isConnected()) {
@@ -1141,10 +1155,11 @@ void WMaxCtrlSS::disconnect() {
     cModule *radio = BS->getSubmodule("radio");
 
     if (!radio)
-	opp_error("Unable to obtain radio submodule in BS[%d]\n",
-		  BS->getIndex());
+    	opp_error("Unable to obtain radio submodule in BS[%d]\n", BS->getIndex());
+
+    // disconnect on radio!
     WMaxRadio * wmaxRadio = check_and_cast<WMaxRadio*>(radio);
-    wmaxRadio->disconnect(SSif);
+    wmaxRadio->disconnect(SSif, fromDestructor);
 }
 
 /** 
@@ -1175,7 +1190,7 @@ WMaxCtrlSS::~WMaxCtrlSS(){
 	TIMER_DEL(Handover);
 	TIMER_DEL(Reentry);
 
-
+	disconnect(true);
 	for (list<WMaxFlowSS*>::iterator it=serviceFlows.begin(); it!=serviceFlows.end(); ++it)
 	{
 		delete *it;
@@ -1205,11 +1220,12 @@ void WMaxCtrlBS::fsmInit()
 //Get ID from name
 int WMaxCtrlBS::getIDFromName(char * name){
 	if (strlen(name) < 3) return 0;
-	char num[30];
-	for (uint32_t i=2; i<strlen(name); i++)
-		num[i-2]=name[i];
-	num[strlen(name)]='\0';
 
+	char num[5];
+	for (uint32_t i=2; i<strlen(name); i++){
+		num[i-2]=name[i];
+	}
+	num[strlen(name)-2]='\0';
 	return atoi(num);
 }
 
@@ -1219,6 +1235,11 @@ string WMaxCtrlBS::getNameFromId(int id){
 	sprintf(buf, "BS%d" , id);
 	string ret=buf;
 	return ret;
+}
+
+// Expose information, number of SSs
+int WMaxCtrlBS::getNumOfSS(){
+	return ssList.size();
 }
 
 void WMaxCtrlBS::initialize()
@@ -1235,10 +1256,11 @@ void WMaxCtrlBS::initialize()
 	opp_error("Invalid LogLevel: %d. Accepted values: 1..8\n", logLevel);
 	logger::setLogLevel(logLevel);
 
-    EV << "Initializing Control BS: "<<BS->getName()<<endl;
+
     char buf[80];
     sprintf(buf,"WMaxCtrlBS%d",WMaxCtrlBS::getIDFromName((char *)BS->getName()));
     setName(buf);
+    EV << "Initializing Control BS: "<<BS->getName() << " Ctrl="<<getName()<<endl;
 
     WATCH_LIST(ssList);
     WATCH_LIST(Transactions);
@@ -1281,8 +1303,8 @@ SSInfo_t * WMaxCtrlBS::getSS(uint16_t basicCid, string reason)
     }
   }
    
-  opp_error("Unable to find SS with cid=%d while %s\n", basicCid, reason.c_str());
-  return 0; // just to avoid compilation warning
+  //opp_error("Unable to find SS with cid=%d while %s\n", basicCid, reason.c_str());
+  return NULL; // just to avoid compilation warning
 }
 
 void WMaxCtrlBS::deleteSS(uint16_t basicCid)
@@ -1441,6 +1463,11 @@ void WMaxCtrlBS::handleMessage(cMessage *msg)
 
     if (dynamic_cast<WMaxMsgHOIND*>(msg)) {
         SSInfo_t * ss = getSS( GetCidFromMsg(msg), "HO-IND received");
+        if (!ss){
+        	Log(Warning)<<"Could not find and delete SS on HO-IND received!"<<endl;
+        	delete msg;
+        	return;
+        }
         std::stringstream x;
         x << "HO-IND received (SS " << ss->getMac() << "), removing connections (cid=):"
           << ss->basicCid << "(basic)";
@@ -1536,7 +1563,6 @@ void WMaxCtrlBS::handleMessage(cMessage *msg)
         return;
     }
 
-    bool transFound = false;
 
     if (dynamic_cast<WMaxMsgDsaAck*>(msg)) {
         SSInfo_t * ss = getSS( GetCidFromMsg(msg), "DSA-ACK received");
@@ -1559,7 +1585,6 @@ void WMaxCtrlBS::handleMessage(cMessage *msg)
             addConn->setVlanId(0, it->vlanid);
             send(addConn, "macOut");
 
-            transFound = true;
 
             // find this SS
             SSInfo_t * ss = getSS( GetCidFromMsg(msg), "Received DSA-ACK" );
@@ -1619,6 +1644,7 @@ void WMaxFlowSS::setParentFsm(Fsm *parent){
 void WMaxFlowSS::fsmInit() {
     setName("WMaxFlowSS");
     rsaNACKs = 0;
+    WATCH(rsaNACKs);
     statesEventsInit(WMaxFlowSS::STATE_NUM, WMaxFlowSS::EVENT_NUM, STATE_START);
 
     stateInit(STATE_START, "Start", onEventState_Start);

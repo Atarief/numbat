@@ -259,12 +259,14 @@ void WMaxMacCS::handleDlMessage(cMessage *msg) {
 	}
 
 	// Check for ARP from the higher layer
+	// Should be checked later... (see bellow)
 	if (dynamic_cast<ARPPacket *>(msg)){
 		// Remember; DELETE CONTROL INFO
 		msg->removeControlInfo();
 		// Send to CID WMAX_CID_BROADCAST
 		dlMsgSend(msg, WMAX_CID_BROADCAST);
-		Log(Debug) << "Broadcast message (" << msg->getFullName() << ") sent to CID=" <<WMAX_CID_BROADCAST<< LogEnd;
+		Log(Debug) << "Broadcast ARP message (" << msg->getFullName()
+				   << ") sent to CID=" <<WMAX_CID_BROADCAST<< LogEnd;
 		return;
 	}
 
@@ -307,6 +309,12 @@ void WMaxMacCS::handleDlMessage(cMessage *msg) {
 		}
 
 	}
+
+
+	// ** FIXME: AFTER CHECKING VLAN ID (ARPReQ Will be BC in a VLAN)
+	// THIS DOESN'T WORK FOR BE CIDs cause they do not meet the minimum
+	// allocation criteria, and get 0 BW! So ARP times out
+
 
 	Log(Info) << "Unable to find a proper connection for msg(" << msg->getFullName() << ") from vlan=" << vlanid << endl;
 

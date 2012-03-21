@@ -293,10 +293,14 @@ void WMaxMacBS::initialize()
 
     // Create permanent INITIAL-RANGING connection
     addRangingConn();
-    initialBCSent = false;
     WMaxMac::initialize();
 
-    dlSymbolsPc = 0.5;
+    // Initialize MAC parameters statically currently
+	symbols = 48;
+    dlSymbolsPc = par("dlSymbolsPc").doubleValue();
+	/// the % of symbols to be used for upload
+	dlSymbolsPc_admit = dlSymbolsPc;
+	subchannels = 60;
     WATCH(dlSymbolsPc);
 }
 
@@ -615,8 +619,6 @@ void WMaxMacBS::scheduleBcastMessages()
 		queuedMsgsCnt++;
     }
 
-    // Either Way we where in these functions
-    initialBCSent=true;
 
 }
 
@@ -744,7 +746,7 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
     int i;
     int ieCnt = 0;
     WMaxUlMapIE ie;
-    int bytesPerPS = WMAX_BYTES_PER_SYMBOL; // this depends on modulation used, use 12 bytes/symbol for now
+    uint bytesPerPS = WMAX_BYTES_PER_SYMBOL; // this depends on modulation used, use 12 bytes/symbol for now
 
     WMaxMsgUlMap * ulmap = new WMaxMsgUlMap("UL-MAP");
 
@@ -1023,7 +1025,7 @@ WMaxMsgUlMap * WMaxMacBS::scheduleUL(int symbols)
 			it->bandwidth = uint32_t(double(it->qos.rtps.mrr)*FrameLength);
 			int symbolLength = 0;
 			// Check minimum
-			if ((int)it->bandwidth < (WMAX_SCHED_MIN_RTPS_SYMBOLS*8*bytesPerPS)){
+			if (it->bandwidth < (WMAX_SCHED_MIN_RTPS_SYMBOLS*8*bytesPerPS)){
 				it->bandwidth=(WMAX_SCHED_MIN_RTPS_SYMBOLS*8*bytesPerPS);
 				symbolLength = WMAX_SCHED_MIN_RTPS_SYMBOLS;
 			}
@@ -1313,11 +1315,7 @@ void WMaxMac::initialize(){
 
 	queueLimit = par("queueLimit");
 
-	// Initialize MAC parameters statically currently
-	symbols = 48;
-	/// the % of symbols to be used for upload
-	dlSymbolsPc_admit = dlSymbolsPc = 0.5;
-	subchannels = 60;
+
 
 }
 

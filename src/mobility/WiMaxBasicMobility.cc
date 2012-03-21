@@ -108,6 +108,11 @@ void WiMaxBasicMobility::initialize(int stage)
     }
 }
 
+// remove the F*** host
+void WiMaxBasicMobility::finish(){
+	 cc->unregisterHost(hostPtr);
+}
+
 void WiMaxBasicMobility::handleMessage(cMessage * msg)
 {
     if (!msg->isSelfMessage())

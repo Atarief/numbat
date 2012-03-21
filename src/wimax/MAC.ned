@@ -41,6 +41,7 @@ moduleinterface IWMaxMacBS
 	 	// is for MobileWiMax
         volatile double FrameLength @unit(s);
         int queueLimit;
+        double dlSymbolsPc;
     gates:
         input phyIn;
         output phyOut;
@@ -51,11 +52,13 @@ moduleinterface IWMaxMacBS
 simple WMaxMacBS like IWMaxMacBS
 {
     parameters:
-        // WiMax Frame Length
+        
         // Frame can vary from 2-20ms, but 5ms
 	 	// is for MobileWiMax
-        volatile double FrameLength @unit(s) = default(5ms);
-        int queueLimit = default(1000);
+        volatile double FrameLength @unit(s) = default(5ms); // WiMax Frame Length
+        int queueLimit = default(1000);	// Queue Limit
+        double dlSymbolsPc = default(0.5); // Symbols used for download (%, 0.5 = 50%-50%)
+        
     gates:
         input phyIn;
         output phyOut;

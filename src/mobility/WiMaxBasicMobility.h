@@ -44,7 +44,13 @@
  *
  * @ingroup mobility
  * @ingroup basicModules
- * @author Daniel Willkomm, Andras Varga
+ * @author Daniel Willkomm, Andras Varga, Bontozoglou Andreas
+ *
+ *
+ * FIXXXES:
+ *  1) Allow multiple wireless tech. in the same schenario
+ *  2) FINISH FUNCTION TO REMOVE HOSTS! This is needed on dynamic host
+ *     creation and removal.
  */
 class WiMaxBasicMobility : public BasicModule
 {
@@ -81,7 +87,7 @@ class WiMaxBasicMobility : public BasicModule
     virtual void initialize(int);
 
     /** @brief Delete dynamically allocated objects*/
-    virtual void finish() {}
+    virtual void finish();
 
   protected:
     /** @brief Called upon arrival of a self messages*/

@@ -25,6 +25,7 @@ Define_Module(WMaxRadio);
 
 void WMaxRadio::initialize()
 {
+	// This is to register the BASE STATION!
 	ChannelControl * cc = dynamic_cast<ChannelControl *>(findModuleSomewhereUp(par("controlModuleName").stdstringValue().c_str(), this));
 
 	if (cc){
@@ -99,16 +100,17 @@ void WMaxRadio::connect(cModule * ssif)
     }
 }
 
-void WMaxRadio::disconnect(cModule * ss)
+void WMaxRadio::disconnect(cModule * ssIf, bool fromDestructor)
 {
-    if (!ss->gate("out")->getNextGate()->isConnected()) { //Urban ->getNextGate()
+	Enter_Method_Silent("");
+    if (!ssIf->gate("out")->getNextGate()->isConnected()) { //Urban ->getNextGate()
     	return;
     }
     
-    cGate * bsGate = ss->gate("out")->getNextGate()->getNextGate(); //Urban ->getNextGate()
+    cGate * bsGate = ssIf->gate("out")->getNextGate()->getNextGate(); //Urban ->getNextGate()
     cModule * bs = bsGate->getOwnerModule();
 
-    Log(Debug) << "Disconnecting SS " << ss->getFullName() << " from BS[" << bs->getIndex() << "]." << LogEnd;
+    Log(Debug) << "Disconnecting SS " << ssIf->getFullName() << " from " << bs->getFullName() << "." << LogEnd;
     if (bs!=getParentModule()) {
     	opp_error("Attempted to disconnect from the wrong BS.\n");
     }
@@ -120,5 +122,27 @@ void WMaxRadio::disconnect(cModule * ss)
 
     bs->gate("in", ind)->disconnect();
     bs->gate("out", ind)->disconnect();
+
+    // Urb@n Dynamically remove modules call disconnect, but the do not send
+    // WMaxMsgHOIND... so fake it here!
+    if (fromDestructor){
+    	Log(Debug) << "WMaxRadio::disconnect called from a destructor, sending WMaxMsgHOIND message to upper layers"<<endl;
+		WMaxMsgHOIND * hoInd = new WMaxMsgHOIND();
+		hoInd->setName("HO-IND");
+		// Set Header
+		ssInfo * ssnfo = dynamic_cast<ssInfo *>(ssIf->getSubmodule("ssInfo"));
+		// Sanity Check
+		if (!ssnfo) {
+			opp_error("NO SSINFO!!! SHIT :(");
+			return;
+		}
+		WMaxMacHeader * hdr = new WMaxMacHeader();
+		hdr->cid = ssnfo->info.basicCid;;
+		hoInd->setControlInfo(hdr);
+
+		send(hoInd,"phyOut");
+    }
+
+
 
 }

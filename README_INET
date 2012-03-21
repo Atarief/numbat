@@ -1,3 +1,13 @@
+
+== INTRO ==
+
+This is a first try to integrate OMNet++ INET/MANET framework with numbat. The 
+general idea is that the BS bridge the WiMax network with an Ethernet network.
+VLANs are used in order to map WiMax services to Ethernet.
+
+
+== INSTALLATION == 
+
 This version depends on 
 
 - 802.1Q VLANs for the CS sub-layer 
@@ -12,9 +22,16 @@ Installation:
 - Extract the archive 
 - Import the Vlans project into your workspace
 - Import the PON project into your workspace
+- Setup the dependencies (Project References)
 - Clean it and re-compile it
 
 ... it should work. Separate link will be provided in the future (only for the VLANs)
+
+== USAGE ==
+
+The main models provided from this release can be found under the <proj>/src/wimax/models. 
+These include the above described VlanBS, a generic WiMax Interface which can be used in 
+other modules and an example host using the WiMax interface and TCP/IP stack of the INET.
 
 
 Andreas

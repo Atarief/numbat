@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for libnumbat
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep --make-so -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/util/headerserializers/headers -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/arp -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/transport/sctp -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/world -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/transport/contract -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/linklayer/mfcore -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/linklayer/ethernet -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/ted -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/util -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/linklayer/ieee80211/mac -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/common -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/ipv6 -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/applications/pingapp -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/ldp -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/transport/tcp -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/util/headerserializers -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/rsvp_te -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/transport/udp -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/ipv4 -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/icmpv6 -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/base -I../../Vlans/src/linklayer -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/contract -I../../PON/src/common -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/manetrouting/base -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/networklayer/mpls -I/media/data/OMNet/inetmanet-inetmanet-00f64c2/src/linklayer/contract -L../../Vlans/out/$(CONFIGNAME)/src -L/media/data/OMNet/inetmanet-inetmanet-00f64c2/out/$(CONFIGNAME)/src -L../../PON/out/$(CONFIGNAME)/src -L../../PON/out/$(CONFIGNAME) -lVlans -linet -lPON -lPON -KVLANS_PROJ=../../Vlans -KINETMANET_PROJ=/media/data/OMNet/inetmanet-inetmanet-00f64c2 -KPON_PROJ=../../PON
+#  opp_makemake -f --deep --make-so -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/util/headerserializers/headers -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/arp -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/transport/sctp -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/world -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/transport/contract -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/linklayer/mfcore -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/linklayer/ethernet -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/ted -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/util -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/linklayer/ieee80211/mac -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/common -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/ipv6 -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/applications/pingapp -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/ldp -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/transport/tcp -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/util/headerserializers -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/rsvp_te -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/transport/udp -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/ipv4 -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/icmpv6 -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/base -I../../Vlans/src/linklayer -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/contract -I../../PON/src/common -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/manetrouting/base -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/networklayer/mpls -I/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/src/linklayer/contract -L../../Vlans/out/$(CONFIGNAME)/src -L/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/out/$(CONFIGNAME)/src -L../../PON/out/$(CONFIGNAME)/src -L../../PON/out/$(CONFIGNAME) -lVlans -linet -lPON -lPON -KVLANS_PROJ=../../Vlans -KINETMANET_PROJ=/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2 -KPON_PROJ=../../PON
 #
 
 # Name of target to be created (-o option)
@@ -91,7 +91,7 @@ MSGFILES = \
 
 # Other makefile variables (-K)
 VLANS_PROJ=../../Vlans
-INETMANET_PROJ=/media/data/OMNet/inetmanet-inetmanet-00f64c2
+INETMANET_PROJ=/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2
 PON_PROJ=../../PON
 
 #------------------------------------------------------------------------------
@@ -349,15 +349,23 @@ $O/wimax/wmaxphy.o: wimax/wmaxphy.cc \
 	util/ssinfo.h \
 	$(INETMANET_PROJ)/src/world/ChannelControl.h
 $O/wimax/wmaxradio.o: wimax/wmaxradio.cc \
-	wimax/wmaxradio.h \
-	util/fsm.h \
-	$(INETMANET_PROJ)/src/linklayer/mfcore/AirFrame_m.h \
+	wimax/wmaxmsg_m.h \
 	$(INETMANET_PROJ)/src/base/INETDefs.h \
+	$(INETMANET_PROJ)/src/linklayer/mfcore/AirFrame_m.h \
+	$(PON_PROJ)/src/common/CopyableQueueCVectors.h \
+	util/hoinfo.h \
+	wimax/wmaxmsg.h \
+	wimax/wmaxmac.h \
+	wimax/wmaxradio.h \
+	util/Portable.h \
+	util/fsm.h \
 	$(INETMANET_PROJ)/src/base/Coord.h \
 	$(INETMANET_PROJ)/src/base/ModuleAccess.h \
+	util/IPv6Addr.h \
 	util/logger.h \
 	$(INETMANET_PROJ)/src/util/FWMath.h \
-	$(INETMANET_PROJ)/src/world/ChannelControl.h
+	$(INETMANET_PROJ)/src/world/ChannelControl.h \
+	util/ssinfo.h
 $O/wimax/wmaxmac.o: wimax/wmaxmac.cc \
 	wimax/wmaxmsg_m.h \
 	$(INETMANET_PROJ)/src/base/INETDefs.h \

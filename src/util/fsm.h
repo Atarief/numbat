@@ -97,7 +97,7 @@ class Fsm : public cSimpleModule {
 public:
     Fsm();
     FsmStateType State() { return CurrentState; }
-    FsmState * CurrentStateGet() { return &States[CurrentState]; }
+    FsmState * CurrentStateGet() {return &States[CurrentState];}
     std::vector<FsmState> States;
     std::vector<FsmEvent> Events;
 

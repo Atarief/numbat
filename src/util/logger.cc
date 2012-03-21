@@ -3,7 +3,7 @@
  *                                                                           
  * authors: Tomasz Mrugalski <thomson@klub.com.pl>                           
  *          Marek Senderski <msend@o2.pl>                                    
- * changes: Micha³ Kowalczuk <michal@kowalczuk.eu>
+ * changes: Michaï¿½ Kowalczuk <michal@kowalczuk.eu>
  *                                                                           
  * released under GNU GPL v2 or later licence                                
  */
@@ -17,7 +17,6 @@
 #include <time.h>
 #include "logger.h"
 #include <omnetpp.h>
-#include "cenvir.h"
 
 namespace logger {
 //    const int Emerg=1;

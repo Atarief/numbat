@@ -1,13 +1,20 @@
 CHANGELOG
-* numbat-inet v0.2 (~ 30 Jun 2011 - 21 Sep 2011)
+* numbat-inet v0.2 
+ -	Bug Fix: WMaxCtrlBS::getIDFromName...
+ -	BUG FIX: Possible SegFault on renegotiation of dissabled flows
+ -	Modified disconnect methods to support dynamic SS deletition.
+ -	WiMaxBaseMobility finish function now deletes the HostRef from the ChannelControl module.
+ 	(this is also missing in INET's BaseMobility!). This enables dynamic SS deletetion.
+ -	Public Function to retrieve the number of SSs associated with the BS
+ -	dlSymbolsPc is now a parameter on the bsMac module (where 1-dlSymbolsPc = ulSymbolsPc) 
  -	RSA NACKs are now logged as scalar
  -	Some documentation added
  -	Retry Connection on Scan Response for any NACKed flow
  -	Fairness fixxed in the scheduler
  -	Scheduler now just WARNS for misconfiguration (out of symbols), instead of opp_error
- -	ulSymbolsPc now indicates the % of symbols used for Uplink (TODO: add as parameter) 
+ -	ulSymbolsPc now indicates the % of symbols used for Uplink 
  -	ulSymbolsPc_admit can be used to indicate how many symbols should be used for admission 
- 	control, independantly from the number used for scheduling
+ 	control, independently from the number used for scheduling
 
 
 * numbat-inet v0.1 (~ 15 Dec 2010)

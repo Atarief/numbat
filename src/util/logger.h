@@ -3,8 +3,8 @@
  *
  * authors: Tomasz Mrugalski <thomson@klub.com.pl>
  *          Marek Senderski <msend@o2.pl>
- * changes: Micha³ Kowalczuk <michal@kowalczuk.eu>
- * changes: Micha³ Kowalczuk <michal@kowalczuk.eu>
+ * changes: Michaï¿½ Kowalczuk <michal@kowalczuk.eu>
+ * changes: Michaï¿½ Kowalczuk <michal@kowalczuk.eu>
  *
  * $Id: Logger.h,v 1.15 2006-11-30 03:21:51 thomson Exp $
  *
@@ -16,7 +16,7 @@
 #define LOGGER_H
 
 #include <omnetpp.h>
-#include "cenvir.h"
+#include <cenvir.h>
 #include <iostream>
 #include <string>
 

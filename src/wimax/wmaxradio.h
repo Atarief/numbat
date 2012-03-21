@@ -14,12 +14,20 @@
 #include <omnetpp.h>
 #include <vector>
 #include "fsm.h"
+#include "wmaxmsg_m.h"
+#include "wmaxmac.h"
+#include "ssinfo.h"
 
 class WMaxRadio : public cSimpleModule
 {
 public:
     void connect(cModule * ss);
-    void disconnect(cModule * ss);
+    /**
+     * Urban: Second parameter indicates if the call comes
+     * from a destructor. If true, the module will send a
+     * WMaxMacHeader message do clean the BS ssList.
+     */
+    void disconnect(cModule * ss, bool fromDestructor=false);
 protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

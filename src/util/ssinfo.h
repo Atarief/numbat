@@ -48,6 +48,8 @@ class ssInfo : public cSimpleModule {
 public:
     SSInfo_t info;
     HoInfo_t hoInfo;
+    // Pass it here... to support volatile (random) initial BS
+    int initialBS;
     void stringUpdate();
 
     void addEventListener(cModule * module);

@@ -60,9 +60,9 @@ public:
     ~WMaxCtrlSS();
     WMaxCtrlSS();
     cModule *SSif;
-    void initialize();
-    void finish();
-    void handleMessage(cMessage *msg);
+    virtual void initialize();
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg);
     list<WMaxFlowSS*> serviceFlows;
 
 
@@ -154,7 +154,12 @@ protected:
   
     void connectNextBS();
     void connectBS(int x); // connect (i.e. make Omnet connections) to BS[x]
-    void disconnect();
+    /**
+     *  Urb@n: if called from destructor, it will cause
+     * the ss to delete from the BS ssList. For more info
+     * see WMaxRadio::disconnect();
+     */
+    void disconnect(bool fromDestructor = false);
    
     // wait for DL-MAP state
     static FsmStateType onEventState_WaitForDlmap(Fsm * fsm, FsmEventType e, cMessage *msg);
@@ -275,6 +280,8 @@ public:
 	 * Get name from ID
 	 */
 	static std::string getNameFromId(int id);
+	/// Expose information, number of SSs
+	int getNumOfSS();
 
 private:
     list<Transaction> Transactions;

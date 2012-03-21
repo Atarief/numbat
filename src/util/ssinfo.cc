@@ -54,7 +54,6 @@ void ssInfo::initialize() {
 
     hoInfo.mip.remoteLocUpdate = getParentModule()->par("mipRemoteLocUpdate");
     
-    int initialBS = getParentModule()->par("initialBS");
 
     int index = getParentModule()->getIndex();
 

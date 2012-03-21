@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for numbat
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep --nolink -O out -d src -X. -L../Vlans/out/$(CONFIGNAME)/src -L/media/data/OMNet/inetmanet-inetmanet-00f64c2/out/$(CONFIGNAME)/src -L../PON/out/$(CONFIGNAME)/src -L../PON/out/$(CONFIGNAME) -L./out/$(CONFIGNAME)/src -lVlans -linet -lPON -lPON -KVLANS_PROJ=../Vlans -KINETMANET_PROJ=/media/data/OMNet/inetmanet-inetmanet-00f64c2 -KPON_PROJ=../PON
+#  opp_makemake -f --deep --nolink -O out -d src -X. -L../Vlans/out/$(CONFIGNAME)/src -L/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2/out/$(CONFIGNAME)/src -L../PON/out/$(CONFIGNAME)/src -L../PON/out/$(CONFIGNAME) -L./out/$(CONFIGNAME)/src -lVlans -linet -lPON -lPON -KVLANS_PROJ=../Vlans -KINETMANET_PROJ=/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2 -KPON_PROJ=../PON
 #
 
 # Output directory
@@ -12,7 +12,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Other makefile variables (-K)
 VLANS_PROJ=../Vlans
-INETMANET_PROJ=/media/data/OMNet/inetmanet-inetmanet-00f64c2
+INETMANET_PROJ=/media/data/Linux/omnet/inetmanet-inetmanet-00f64c2
 PON_PROJ=../PON
 
 #------------------------------------------------------------------------------

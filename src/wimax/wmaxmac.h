@@ -15,7 +15,7 @@
 #include "wmaxmsg_m.h"
 
 
-// Me
+// Urb@n
 #include "CopyableQueueCVectors.h"
 
 using namespace std;
@@ -42,7 +42,7 @@ using namespace std;
 /**
  *  Urban - TODO:Find the documents
  *
- * Min. is 2 sub-carriers for 2 symbols
+ * "Min. is 2 sub-carriers for 2 symbols"
  */
 #define WMAX_SCHED_MIN_SYMBOLS 4
 
@@ -240,14 +240,7 @@ class WMaxMac : public cSimpleModule
     list<WMaxConn> Conns;
     double FrameLength;
 
-    // --- These _should_ be par. but not currently
-    int symbols;
-    /// the % of symbols to be used for upload scheduling
-    double dlSymbolsPc;
-    /// the % of symbols to be used for CAC
-    double dlSymbolsPc_admit;
-    /// Subchannels
-    int subchannels;
+
 
     // Statistics
 	long int numBytesRecv;
@@ -276,25 +269,35 @@ class WMaxMacBS: public WMaxMac
 	void deleteGranted(WMaxQos & qos);
     void updateDisplay();
     virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    //void handleUlMessage(cMessage* msg);
 
+    // Msg handlers
+    virtual void handleMessage(cMessage *msg);
     void handleRxMessage(cMessage* msg);
 
+    // Admission Control
     virtual bool admitConnection(WMaxMsgDsaReq * dsareq);
     virtual double dataRatePS2Symbols(int datarate);
 
+    // Scheduling
     virtual void schedule();
     virtual void scheduleBcastMessages(); // prepare broadcast messages sent periodically (DCD, UCD, Neighbor-Advertisements)
     virtual WMaxMsgDlMap * scheduleDL(int symbols);
     virtual WMaxMsgUlMap * scheduleUL(int symbols);
-    /// Send at least the first BC (BroadCast) Messages, else SS do not register...
-    bool initialBCSent;
+
+
+    // --- These _should_ be par. but not currently
+	int symbols;
+	/// the % of symbols to be used for upload scheduling
+	double dlSymbolsPc;
+	/// the % of symbols to be used for CAC
+	double dlSymbolsPc_admit;
+	/// Subchannels
+	int subchannels;
 
     virtual void finish();
 
     // Keep the last served BE connection index
-    int BEpoint;
+    uint BEpoint;
 
     // --- configuration parameters ---
     uint32_t schedUgsMinGrantSize; // minimal size of granted bandwidth on UGS connection
